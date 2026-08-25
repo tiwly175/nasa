@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ผู้ช่วยเตรียมสอบ</title>
+    <style>
+        /* ===== โครงสร้างหลัก ===== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f5f7fb;
+            color: #1a1a2e;
+            min-height: 100vh;
+        }
+
+        /* ===== หน้ากรอกรหัส ===== */
+        #gate {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px;
+            background: linear-gradient(145deg, #ffffff, #f0f4fa);
+        }
+
+        #gate.hidden {
+            display: none;
+        }
+
+        #gate h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+            color: #c0392b;
+        }
+
+        #gate .sub {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        #gate input {
+            width: 100%;
+            max-width: 320px;
+            padding: 14px 16px;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            letter-spacing: 2px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            background: white;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: 'Courier New', monospace;
+        }
+
+        #gate input:focus {
+            border-color: #c0392b;
+        }
+
+        #gate .err {
+            color: #c0392b;
+            font-size: 13px;
+            min-height: 24px;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        #gate .logo-btn {
+            margin-top: 20px;
+            width: 120px;
+            height: 120px;
+            border-radius: 30px;
+            border: none;
+            background: linear-gradient(145deg, #c0392b, #a93226);
+            color: white;
+            font-size: 48px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(192, 57, 43, 0.3);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        #gate .logo-btn:active {
+            transform: scale(0.94);
+            box-shadow: 0 4px 12px rgba(192, 57, 43, 0.2);
+        }
+
+        #gate .hint {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #c0392b;
+            font-weight: 600;
+        }
+
+        #gate .note {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+        }
+
+        /* ===== หน้าแอปหลัก ===== */
+        #app {
+            display: none;
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #f5f7fb;
+            padding-bottom: 80px;
+        }
+
+        #app.show {
+            display: block;
+        }
+
+        /* === Top Bar === */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .topbar .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            color: #c0392b;
+        }
+
+        .topbar .brand .icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: #c0392b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .topbar .time {
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        /* === Tab Header === */
+        .tabhead {
+            padding: 16px 16px 8px;
+        }
+
+        .tabhead .kicker {
+            font-size: 12px;
+            font-weight: 700;
+            color: #c0392b;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .tabhead h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        /* === Content View === */
+        .view {
+            padding: 0 16px 16px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #eee;
+        }
+
+        .card h3 {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .card .muted {
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* === Bottom Nav === */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            padding: 6px 0 env(safe-area-inset-bottom);
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .bottom-nav button {
+            flex: 1;
+            border: none;
+            background: none;
+            padding: 8px 0;
+            font-size: 11px;
+            font-weight: 600;
+            color: #888;
+            cursor: pointer;
+            transition: color 0.15s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .bottom-nav button .nav-icon {
+            font-size: 22px;
+        }
+
+        .bottom-nav button.active {
+            color: #c0392b;
+        }
+
+        /* === เมนูวิชา (Grid) === */
+        .subj-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .subj-card {
+            background: white;
+            border-radius: 14px;
+            padding: 14px;
+            text-align: center;
+            border: 1px solid #eee;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .subj-card:active {
+            transform: scale(0.96);
+        }
+
+        .subj-card .emoji {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .subj-card .name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .subj-card .badge {
+            font-size: 10px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        /* === Progress Ring === */
+        .ring-wrap {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            padding: 8px 0;
+        }
+
+        .ring-item {
+            text-align: center;
+        }
+
+        .ring-item .circle {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            margin: 0 auto 4px;
+        }
+
+        .ring-item .label {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .ring-item .status {
+            font-size: 10px;
+            color: #888;
+        }
+
+        /* === Utility === */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            background: #c0392b;
+            color: white;
+            transition: opacity 0.15s;
+            text-align: center;
+        }
+
+        .btn:active {
+            opacity: 0.7;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: #c0392b;
+            border: 1.5px solid #c0392b;
+        }
+
+        .btn-block {
+            width: 100%;
+            display: block;
+        }
+
+        .mt-12 {
+            margin-top: 12px;
+        }
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .gap-8 {
+            gap: 8px;
+        }
+
+        /* === Toast === */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a2e;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 999;
+            animation: fadeUp 0.25s ease-out;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .toast.hide {
+            animation: fadeDown 0.2s ease-in forwards;
+        }
+
+        @keyframes fadeDown {
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(12px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== หน้ากรอกรหัส ===== -->
+    <div id="gate">
+        <h1>🔐 เปิดใช้งานแอป</h1>
+        <p class="sub">กรอกรหัสที่ได้รับจากสถาบัน<br />กรอกครั้งเดียว ใช้ได้ตลอด</p>
+        <input type="text" id="codeInput" placeholder="รหัสเปิดใช้งาน" maxlength="20" autocomplete="off" />
+        <div class="err" id="codeError"></div>
+        <button class="logo-btn" id="unlockBtn">📘</button>
+        <p class="hint" id="hintText">แตะโลโก้เพื่อเปิดใช้งาน</p>
+        <p class="note">รหัสนี้ผูกกับเครื่องนี้<br />ถ้ารหัสมีปัญหา ติดต่อสถาบัน</p>
+    </div>
+
+    <!-- ===== หน้าแอปหลัก ===== -->
+    <div id="app">
+
+        <!-- Top Bar -->
+        <div class="topbar">
+            <div class="brand">
+                <span class="icon">📘</span>
+                <span>LION KING</span>
+            </div>
+            <span class="time" id="clock">12:00</span>
+        </div>
+
+        <!-- Tab Header -->
+        <div class="tabhead">
+            <div class="kicker" id="kicker">📊 ภาพรวม</div>
+            <h1 id="tabTitle">แดชบอร์ด</h1>
+        </div>
+
+        <!-- Content -->
+        <div class="view" id="view">
+            <!-- จะถูก render ด้วย JavaScript -->
+        </div>
+
+        <!-- Bottom Nav -->
+        <div class="bottom-nav" id="bottomNav">
+            <button class="active" data-tab="home">
+                <span class="nav-icon">🏠</span>
+                หน้าแรก
+            </button>
+            <button data-tab="study">
+                <span class="nav-icon">📖</span>
+                ติวหนังสือ
+            </button>
+            <button data-tab="exam">
+                <span class="nav-icon">📝</span>
+                ทำข้อสอบ
+            </button>
+            <button data-tab="profile">
+                <span class="nav-icon">👤</span>
+                โปรไฟล์
+            </button>
+        </div>
+    </div>
+
+    <script>
+        /* ========================================================
+               🚀 แอปจำลอง "ผู้ช่วยเตรียมสอบ" — เวอร์ชันศึกษา
+               ======================================================== */
+
+        // ─── รหัสลับ (SECRET) — ใช้เช็คความถูกต้องของรหัส ───
+        const SECRET = "study-app-2024-secret-key";
+
+        // ─── คีย์ที่ใช้ใน localStorage ───
+        const LIC_KEY = "study_app_license";
+        const DEV_KEY = "study_app_device";
+
+        // ─── ตัวอักษรที่ใช้สร้างรหัส ───
+        const ALPHA = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+
+        // ─── ฟังก์ชันช่วยเหลือ ───
+
+        /** สร้าง Device ID สุ่ม เก็บใน localStorage */
+        function getDeviceId() {
+            let id = localStorage.getItem(DEV_KEY);
+            if (!id) {
+                const arr = new Uint8Array(8);
+                crypto.getRandomValues(arr);
+                id = "D" + Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+                localStorage.setItem(DEV_KEY, id);
+            }
+            return id;
+        }
+
+        /** ทำให้รหัสเป็นมาตรฐาน: ตัวใหญ่ + ตัดอักขระพิเศษ */
+        function normalizeCode(v) {
+            return String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        }
+
+        /** ฟังก์ชัน SHA-256 อย่างง่าย (ใช้ในตัว) */
+        function sha256(str) {
+            // ใช้ SubtleCrypto ถ้ามี
+            if (window.crypto && window.crypto.subtle) {
+                const enc = new TextEncoder().encode(str);
+                return crypto.subtle.digest('SHA-256', enc).then(buf => {
+                    return Array.from(new Uint8Array(buf))
+                        .map(b => b.toString(16).padStart(2, '0'))
+                        .join('');
+                });
+            }
+            // fallback: ใช้ simple hash (ไม่ปลอดภัย แต่ใช้เพื่อศึกษา)
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0;
+            }
+            return Promise.resolve(Math.abs(hash).toString(16).padStart(8, '0'));
+        }
+
+        /** ตรวจสอบว่ารหัสถูกต้องตามรูปแบบหรือไม่ */
+        function isValidCode(raw) {
+            const c = normalizeCode(raw);
+            if (!c.startsWith('STUDY')) return false;
+            const body = c.slice(5);
+            if (body.length !== 10) return false;
+            const payload = body.slice(0, 6);
+            const check = body.slice(6);
+            // ใช้ SHA-256 แบบซิงโครนัส (ต้องใช้ Promise)
+            // แต่ในตัวอย่างนี้ใช้การเช็คแบบง่าย
+            // ในของจริงเขาจะใช้ SHA-256
+            return payload.length === 6 && check.length === 4;
+        }
+
+        /** ทำให้รหัสสวยงาม: STUDY-XXXXXX-XXXX */
+        function prettyCode(v) {
+            const c = normalizeCode(v);
+            if (c.length < 5) return c;
+            const head = c.slice(0, 5);
+            const body = c.slice(5);
+            if (body.length <= 6) return head + '-' + body;
+            return head + '-' + body.slice(0, 6) + '-' + body.slice(6, 10);
+        }
+
+        /** ตรวจสอบว่ารหัสถูกเปิดใช้งานแล้วหรือไม่ */
+        function isActivated() {
+            const lic = localStorage.getItem(LIC_KEY);
+            if (!lic) return false;
+            try {
+                const data = JSON.parse(lic);
+                return data && data.code && data.device === getDeviceId();
+            } catch {
+                return false;
+            }
+        }
+
+        /** บันทึกรหัสลิขสิทธิ์ */
+        function saveLicense(rawCode) {
+            const code = prettyCode(rawCode);
+            const device = getDeviceId();
+            localStorage.setItem(LIC_KEY, JSON.stringify({
+                code: code,
+                device: device,
+                activatedAt: new Date().toISOString()
+            }));
+        }
+
+        // ─── State ของแอป ───
+        const AppState = {
+            tab: 'home',
+            // ข้อมูลตัวอย่าง
+            topics: {
+                math: { label: 'คณิตศาสตร์', icon: '🔢', progress: 65 },
+                thai: { label: 'ภาษาไทย', icon: '📕', progress: 40 },
+                eng: { label: 'ภาษาอังกฤษ', icon: '🌐', progress: 80 },
+                science: { label: 'วิทยาศาสตร์', icon: '🔬', progress: 30 },
+                social: { label: 'สังคมศึกษา', icon: '🌏', progress: 55 },
+            },
+            // คะแนนทำข้อสอบ
+            scores: {},
+            // ข้อมูลผู้ใช้
+            user: {
+                name: 'นักเรียนตัวอย่าง',
+                level: 'ม.6',
+            }
+        };
+
+        // ─── DOM References ───
+        const gate = document.getElementById('gate');
+        const app = document.getElementById('app');
+        const codeInput = document.getElementById('codeInput');
+        const codeError = document.getElementById('codeError');
+        const unlockBtn = document.getElementById('unlockBtn');
+        const hintText = document.getElementById('hintText');
+        const view = document.getElementById('view');
+        const kicker = document.getElementById('kicker');
+        const tabTitle = document.getElementById('tabTitle');
+        const clock = document.getElementById('clock');
+        const navBtns = document.querySelectorAll('#bottomNav button');
+
+        // ─── Toast System ───
+        let toastTimer = null;
+
+        function showToast(msg) {
+            const old = document.querySelector('.toast');
+            if (old) old.remove();
+            const el = document.createElement('div');
+            el.className = 'toast';
+            el.textContent = msg;
+            document.body.appendChild(el);
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                el.classList.add('hide');
+                setTimeout(() => el.remove(), 250);
+            }, 2500);
+        }
+
+        // ─── ฟังก์ชัน Render ───
+
+        function render() {
+            const tab = AppState.tab;
+            // อัปเดตหัวข้อ
+            const titles = {
+                home: { k: '📊 ภาพรวม', t: 'แดชบอร์ด' },
+                study: { k: '📖 ติวหนังสือ', t: 'เลือกวิชาเรียน' },
+                exam: { k: '📝 ทำข้อสอบ', t: 'เลือกหัวข้อ' },
+                profile: { k: '👤 โปรไฟล์', t: 'ข้อมูลส่วนตัว' },
+            };
+            const info = titles[tab] || titles.home;
+            kicker.textContent = info.k;
+            tabTitle.textContent = info.t;
+
+            // อัปเดตปุ่มนำทาง
+            navBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tab);
+            });
+
+            // Render เนื้อหาตามแท็บ
+            switch (tab) {
+                case 'home':
+                    renderHome();
+                    break;
+                case 'study':
+                    renderStudy();
+                    break;
+                case 'exam':
+                    renderExam();
+                    break;
+                case 'profile':
+                    renderProfile();
+                    break;
+                default:
+                    renderHome();
+            }
+        }
+
+        /** หน้าแรก — แดชบอร์ด */
+        function renderHome() {
+            const topics = AppState.topics;
+            const total = Object.keys(topics).length;
+            const done = Object.values(topics).filter(t => t.progress >= 80).length;
+            const avg = total ? Math.round(Object.values(topics).reduce((s, t) => s + t.progress, 0) / total) : 0;
+
+            let html = `
+                    <div class="card">
+                        <h3>📈 ความพร้อมโดยรวม</h3>
+                        <div class="ring-wrap">
+                            <div class="ring-item">
+                                <div class="circle" style="background:conic-gradient(#c0392b ${avg}%, #eee 0);">
+                                    ${avg}%
+                                </div>
+                                <div class="label">ภาพรวม</div>
+                                <div class="status">${done}/${total} วิชา</div>
+                            </div>
+                            <div class="ring-item">
+                                <div class="circle" style="background:conic-gradient(#2ecc71 ${Math.round(done/total*100)}%, #eee 0);">
+                                    ${Math.round(done/total*100)}%
+                                </div>
+                                <div class="label">ผ่านแล้ว</div>
+                                <div class="status">${done} วิชา</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>📚 วิชาที่กำลังเรียน</h3>
+                        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+                            ${Object.entries(topics).map(([key, t]) => `
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <span style="font-size:20px;">${t.icon}</span>
+                                    <div style="flex:1;">
+                                        <div style="font-size:13px;font-weight:600;">${t.label}</div>
+                                        <div style="height:6px;background:#eee;border-radius:99px;overflow:hidden;margin-top:2px;">
+                                            <div style="height:100%;width:${t.progress}%;background:${t.progress >= 80 ? '#2ecc71' : '#c0392b'};border-radius:99px;"></div>
+                                        </div>
+                                    </div>
+                                    <span style="font-size:12px;font-weight:700;color:${t.progress >= 80 ? '#2ecc71' : '#888'};">${t.progress}%</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>⚡ กิจกรรมวันนี้</h3>
+                        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+                            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0;">
+                                <span style="font-size:20px;">📖</span>
+                                <span style="flex:1;font-size:13px;">ทบทวน คณิตศาสตร์</span>
+                                <span style="font-size:12px;color:#888;">✅ ทำแล้ว</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0;">
+                                <span style="font-size:20px;">📝</span>
+                                <span style="flex:1;font-size:13px;">ทำข้อสอบ ภาษาอังกฤษ</span>
+                                <span style="font-size:12px;color:#c0392b;">⏳ รอทำ</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;">
+                                <span style="font-size:20px;">🏃</span>
+                                <span style="flex:1;font-size:13px;">ฝึกสมรรถภาพ</span>
+                                <span style="font-size:12px;color:#888;">⏳ รอทำ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-block btn-ghost" onclick="showToast('📅 กำลังพัฒนา...')">
+                        📅 ดูปฏิทินทั้งหมด
+                    </button>
+                `;
+            view.innerHTML = html;
+        }
+
+        /** หน้าติวหนังสือ */
+        function renderStudy() {
+            let html = `
+                    <div class="card">
+                        <h3>📖 เลือกวิชาที่ต้องการเรียน</h3>
+                        <p class="muted">แตะที่วิชาเพื่อดูเนื้อหา</p>
+                    </div>
+                    <div class="subj-grid">
+                        ${Object.entries(AppState.topics).map(([key, t]) => `
+                            <div class="subj-card" onclick="showToast('📖 กำลังเปิด ${t.label}...')">
+                                <span class="emoji">${t.icon}</span>
+                                <div class="name">${t.label}</div>
+                                <div class="badge">${t.progress}% · ${t.progress >= 80 ? '✅ ผ่าน' : '📖 กำลังเรียน'}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="card" style="margin-top:12px;">
+                        <h3>🎬 คลิปแนะนำ</h3>
+                        <div style="display:flex;gap:10px;align-items:center;padding:8px 0;">
+                            <div style="width:60px;height:60px;border-radius:10px;background:#c0392b;display:flex;align-items:center;justify-content:center;color:white;font-size:24px;flex:none;">▶</div>
+                            <div style="flex:1;">
+                                <div style="font-size:14px;font-weight:600;">พื้นฐานคณิตศาสตร์</div>
+                                <div style="font-size:12px;color:#888;">12:34 · ดูแล้ว 45%</div>
+                            </div>
+                            <button class="btn" style="padding:6px 14px;font-size:12px;" onclick="showToast('▶️ กำลังเล่น...')">ดู</button>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #eee;">
+                            <div style="width:60px;height:60px;border-radius:10px;background:#2ecc71;display:flex;align-items:center;justify-content:center;color:white;font-size:24px;flex:none;">▶</div>
+                            <div style="flex:1;">
+                                <div style="font-size:14px;font-weight:600;">ไวยากรณ์ภาษาอังกฤษ</div>
+                                <div style="font-size:12px;color:#888;">8:20 · ยังไม่ได้ดู</div>
+                            </div>
+                            <button class="btn" style="padding:6px 14px;font-size:12px;" onclick="showToast('▶️ กำลังเล่น...')">ดู</button>
+                        </div>
+                    </div>
+                `;
+            view.innerHTML = html;
+        }
+
+        /** หน้าทำข้อสอบ */
+        function renderExam() {
+            let html = `
+                    <div class="card">
+                        <h3>📝 เลือกหัวข้อทำข้อสอบ</h3>
+                        <p class="muted">สุ่มข้อสอบ 10 ข้อ · ต้องผ่าน 80%</p>
+                    </div>
+                    ${Object.entries(AppState.topics).map(([key, t]) => `
+                        <div class="card" style="cursor:pointer;" onclick="startQuiz('${key}')">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <span style="font-size:28px;">${t.icon}</span>
+                                <div style="flex:1;">
+                                    <div style="font-size:15px;font-weight:600;">${t.label}</div>
+                                    <div style="font-size:12px;color:#888;">${t.progress >= 80 ? '✅ ผ่านแล้ว' : '🎯 ยังไม่ผ่าน'}</div>
+                                </div>
+                                <button class="btn" style="padding:6px 14px;font-size:12px;">เริ่ม</button>
+                            </div>
+                        </div>
+                    `).join('')}
+
+                    <div class="card" style="margin-top:12px;border:2px dashed #c0392b;background:#fdf2f2;">
+                        <h3>🎯 ข้อสอบเสมือนจริง 150 ข้อ</h3>
+                        <p class="muted">จำลองสนามสอบจริง จับเวลา 3 ชั่วโมง</p>
+                        <button class="btn btn-block mt-12" onclick="showToast('📝 กำลังสร้างข้อสอบ...')">
+                            เริ่มสอบเสมือนจริง
+                        </button>
+                    </div>
+                `;
+            view.innerHTML = html;
+        }
+
+        /** หน้าโปรไฟล์ */
+        function renderProfile() {
+            const user = AppState.user;
+            const lic = localStorage.getItem(LIC_KEY);
+            const licData = lic ? JSON.parse(lic) : null;
+
+            let html = `
+                    <div class="card">
+                        <div style="display:flex;align-items:center;gap:16px;">
+                            <div style="width:64px;height:64px;border-radius:50%;background:#c0392b;display:flex;align-items:center;justify-content:center;color:white;font-size:28px;flex:none;">👤</div>
+                            <div>
+                                <div style="font-size:18px;font-weight:700;">${user.name}</div>
+                                <div style="font-size:13px;color:#888;">${user.level}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>📊 สถิติ</h3>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;text-align:center;">
+                            <div style="background:#f8f9fa;border-radius:10px;padding:12px;">
+                                <div style="font-size:22px;font-weight:700;color:#c0392b;">${Object.keys(AppState.topics).length}</div>
+                                <div style="font-size:11px;color:#888;">วิชาทั้งหมด</div>
+                            </div>
+                            <div style="background:#f8f9fa;border-radius:10px;padding:12px;">
+                                <div style="font-size:22px;font-weight:700;color:#2ecc71;">${Object.values(AppState.topics).filter(t => t.progress >= 80).length}</div>
+                                <div style="font-size:11px;color:#888;">ผ่านแล้ว</div>
+                            </div>
+                            <div style="background:#f8f9fa;border-radius:10px;padding:12px;">
+                                <div style="font-size:22px;font-weight:700;color:#f39c12;">${Object.values(AppState.topics).filter(t => t.progress < 80 && t.progress > 0).length}</div>
+                                <div style="font-size:11px;color:#888;">กำลังเรียน</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🔐 ข้อมูลลิขสิทธิ์</h3>
+                        <div style="font-size:13px;margin-top:4px;word-break:break-all;">
+                            <div><strong>รหัส:</strong> ${licData ? licData.code : '—'}</div>
+                            <div><strong>Device ID:</strong> ${getDeviceId()}</div>
+                            <div><strong>เปิดใช้งาน:</strong> ${licData ? new Date(licData.activatedAt).toLocaleString() : '—'}</div>
+                        </div>
+                        <button class="btn btn-block btn-ghost mt-12" onclick="logout()">
+                            🚪 ออกจากระบบ (ลบรหัส)
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <h3>📦 ข้อมูลแอป</h3>
+                        <div style="font-size:13px;color:#888;">
+                            <div>เวอร์ชัน: 1.0.0 (ศึกษา)</div>
+                            <div>โฮสต์: GitHub Pages</div>
+                            <div>PWA: ✅ พร้อมใช้งาน</div>
+                        </div>
+                    </div>
+                `;
+            view.innerHTML = html;
+        }
+
+        // ─── ฟังก์ชันทำข้อสอบ (จำลอง) ───
+        function startQuiz(subject) {
+            const topic = AppState.topics[subject];
+            if (!topic) return;
+            showToast(`📝 เริ่มทำข้อสอบ ${topic.label}... (จำลอง)`);
+            // ในของจริงจะสุ่มข้อสอบและแสดงผล
+            // จำลองว่าเพิ่มคะแนน
+            const newProgress = Math.min(100, topic.progress + Math.floor(Math.random() * 20) + 5);
+            topic.progress = newProgress;
+            render();
+            showToast(`✅ ทำข้อสอบเสร็จ! ได้คะแนน ${newProgress}%`);
+        }
+
+        // ─── ระบบออกจากระบบ ───
+        function logout() {
+            if (confirm('ยืนยันออกจากระบบ? รหัสจะถูกลบออกจากเครื่องนี้')) {
+                localStorage.removeItem(LIC_KEY);
+                // ไม่ลบ Device ID
+                showGate();
+                showToast('🔓 ออกจากระบบแล้ว');
+            }
+        }
+
+        // ─── ฟังก์ชันแสดงหน้ากรอกรหัส ───
+        function showGate() {
+            gate.classList.remove('hidden');
+            app.classList.remove('show');
+            codeInput.value = '';
+            codeError.textContent = '';
+            hintText.textContent = 'แตะโลโก้เพื่อเปิดใช้งาน';
+            unlockBtn.disabled = false;
+            unlockBtn.style.opacity = '1';
+            codeInput.focus();
+        }
+
+        // ─── ฟังก์ชันเปิดแอป ───
+        function startApp() {
+            gate.classList.add('hidden');
+            app.classList.add('show');
+            render();
+            updateClock();
+            // ตั้งเวลา update นาฬิกา
+            setInterval(updateClock, 30000);
+            showToast('🎉 ยินดีต้อนรับ!');
+        }
+
+        function updateClock() {
+            const now = new Date();
+            clock.textContent = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // ─── ระบบรหัสเปิดใช้งาน ───
+        async function handleUnlock() {
+            const raw = codeInput.value.trim();
+            if (!raw) {
+                codeError.textContent = '⚠️ กรุณากรอกรหัสก่อน';
+                return;
+            }
+
+            // ตรวจสอบรูปแบบ
+            if (!isValidCode(raw)) {
+                codeError.textContent = '❌ รหัสไม่ถูกต้อง (ตัวอย่าง: STUDY-XXXXXX-XXXX)';
+                return;
+            }
+
+            // จำลองการตรวจสอบ (ในของจริงจะเช็คที่เซิร์ฟเวอร์)
+            codeError.textContent = '⏳ กำลังตรวจสอบ...';
+            hintText.textContent = '⏳ กำลังตรวจสอบรหัส...';
+            unlockBtn.disabled = true;
+            unlockBtn.style.opacity = '0.6';
+
+            // จำลองหน่วงเวลา (เหมือนเช็คเซิร์ฟเวอร์)
+            await new Promise(resolve => setTimeout(resolve, 800));
+
+            // ตรวจสอบรหัส (ในของจริงจะตรวจสอบกับเซิร์ฟเวอร์)
+            // ที่นี่จำลองว่าทุกรหัสที่ขึ้นต้นด้วย STUDY และมีความยาวถูกต้อง ใช้ได้
+            const normalized = normalizeCode(raw);
+            if (normalized.startsWith('STUDY') && normalized.length >= 10) {
+                // บันทึกลิขสิทธิ์
+                saveLicense(raw);
+                // เปิดแอป
+                startApp();
+                codeError.textContent = '';
+            } else {
+                codeError.textContent = '❌ รหัสไม่ถูกต้อง ลองใหม่';
+                hintText.textContent = 'แตะโลโก้เพื่อเปิดใช้งาน';
+                unlockBtn.disabled = false;
+                unlockBtn.style.opacity = '1';
+            }
+        }
+
+        // ─── Event Listeners ───
+
+        // ปุ่มเปิดใช้งาน
+        unlockBtn.addEventListener('click', handleUnlock);
+
+        // กด Enter ในช่องกรอกรหัส
+        codeInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleUnlock();
+        });
+
+        // จัดรูปแบบรหัสอัตโนมัติ
+        codeInput.addEventListener('input', function() {
+            const raw = this.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+            // จำกัดความยาว
+            if (raw.length > 20) {
+                this.value = raw.slice(0, 20);
+                return;
+            }
+            // ถ้าขึ้นต้นไม่ใช่ STUDY ให้เติมอัตโนมัติ
+            if (raw.length > 0 && !raw.startsWith('STUDY')) {
+                // ไม่บังคับ
+            }
+            codeError.textContent = '';
+        });
+
+        // ปุ่มนำทาง
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tab = this.dataset.tab;
+                if (tab && AppState.tab !== tab) {
+                    AppState.tab = tab;
+                    render();
+                }
+            });
+        });
+
+        // ─── เริ่มต้นแอป ───
+
+        // ตรวจสอบว่ามีการเปิดใช้งานแล้วหรือไม่
+        if (isActivated()) {
+            startApp();
+        } else {
+            showGate();
+        }
+
+        // ─── Service Worker (PWA) ───
+        if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log('✅ Service Worker ลงทะเบียนแล้ว'))
+                .catch(() => console.log('⚠️ Service Worker ไม่ทำงาน'));
+        }
+
+        // ─── เปิดฟังก์ชันให้ใช้จาก HTML ───
+        window.showToast = showToast;
+        window.startQuiz = startQuiz;
+        window.logout = logout;
+
+        console.log('📘 แอปจำลองพร้อมใช้งาน!');
+        console.log('🔑 รหัสตัวอย่าง: STUDY-123456-7890 (หรือขึ้นต้นด้วย STUDY ใดก็ได้)');
+    </script>
+
+</body>
+</html>
